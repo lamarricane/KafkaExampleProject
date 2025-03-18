@@ -22,11 +22,8 @@ public class ShippingService {
     public void processPayment(OrderDTO order) {
         try {
             logger.info("Shipping order: {}", order.getId());
-            if (Math.random() > 0.5) {
-                throw new RuntimeException("Shipping failed");
-            }
             order.setStatus("SHIPPED");
-            kafkaTemplate.send("sent_orders", order);
+            kafkaTemplate.send("sent_orders", String.valueOf(order.getId()), order);
         } catch (Exception e) {
             logger.error("Error shipping order: {}", order.getId(), e);
             kafkaTemplate.send("payed_orders.DLT", order);

@@ -15,9 +15,6 @@ public class NotificationService {
     public void processShipping(OrderDTO order) {
         try {
             logger.info("Sending notification for order: {}", order.getId());
-            if (Math.random() > 0.5) {
-                throw new RuntimeException("Notification sending failed");
-            }
             logger.info("Notification sent for order: {}", order.getId());
         } catch (Exception e) {
             logger.error("Error sending notification for order: {}", order.getId(), e);

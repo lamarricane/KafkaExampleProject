@@ -15,14 +15,12 @@ public class OrderController {
     }
 
     @PostMapping("/order")
-    public String placeOrder(@RequestBody OrderDTO orderDTO) {
-        OrderDTO createdOrder = orderService.createOrder(orderDTO);
-        return "Order placed: " + createdOrder.getId();
+    public OrderDTO placeOrder(@RequestBody OrderDTO orderDTO) {
+        return orderService.createOrder(orderDTO);
     }
 
     @PutMapping("/order/{id}/status")
-    public String updateOrderStatus(@PathVariable Long id, @RequestParam String status) {
-        OrderDTO updatedOrder = orderService.updateOrderStatus(id, status);
-        return "Order status updated: " + updatedOrder.getId();
+    public OrderDTO updateOrderStatus(@PathVariable Long id, @RequestParam String status) {
+        return orderService.updateOrderStatus(id, status);
     }
 }

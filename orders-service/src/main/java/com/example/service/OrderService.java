@@ -23,17 +23,26 @@ public class OrderService {
 
     public OrderDTO createOrder(OrderDTO orderDTO) {
         Order order = new Order();
-        order.setArticleNumbers(orderDTO.getArticleNumbers());
         order.setAmount(orderDTO.getAmount());
         order.setStatus("NEW");
         orderRepository.save(order);
 
         orderDTO.setId(order.getId());
-        orderDTO.setOrderDate(order.getOrderDate());
         orderDTO.setStatus(order.getStatus());
 
-        kafkaTemplate.send("new_orders", String.valueOf(orderDTO.getId()), orderDTO);
-        logger.info("Order created: {}", orderDTO);
+        String key = "user_" + orderDTO.getId();
+        kafkaTemplate.send("new_orders", key, orderDTO);
+
+        kafkaTemplate.send("web_logs", "user_" + orderDTO.getId(), orderDTO);
+
+        if (orderDTO.getId() == 1L) {
+            kafkaTemplate.send("web_logs", "user_1", orderDTO);
+        } else if (orderDTO.getId() == 2L) {
+            kafkaTemplate.send("web_logs", "user_2", orderDTO);
+        } else if (orderDTO.getId() == 3L) {
+            kafkaTemplate.send("web_logs", "user_3", orderDTO);
+        }
+        logger.info("Order created and sent to Kafka: {}", orderDTO);
         return orderDTO;
     }
 

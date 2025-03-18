@@ -5,6 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,14 +22,14 @@ public class PaymentService {
     }
 
     @KafkaListener(topics = "new_orders", groupId = "group_id")
-    public void processOrder(OrderDTO order) {
+    public void processOrder(@Payload OrderDTO order,
+                             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
+                             @Header(KafkaHeaders.RECEIVED_KEY) String key) {
+        logger.info("Received order: {} from partition: {} with key: {}", order, partition, key);
         try {
             logger.info("Processing payment for order: {}", order.getId());
-            if (Math.random() > 0.5) {
-                throw new RuntimeException("Payment processing failed");
-            }
             order.setStatus("PAYED");
-            kafkaTemplate.send("payed_orders", order);
+            kafkaTemplate.send("payed_orders", String.valueOf(order.getId()), order);
         } catch (Exception e) {
             logger.error("Error processing order: {}", order.getId(), e);
             kafkaTemplate.send("new_orders.DLT", order);
